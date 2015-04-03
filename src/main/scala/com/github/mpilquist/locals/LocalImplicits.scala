@@ -1,16 +1,11 @@
 package com.github.mpilquist.locals
 
 import scala.tools.nsc
-import nsc.Global
-import nsc.Phase
-import nsc.plugins.Plugin
-import nsc.plugins.PluginComponent
+import nsc.{ Global, Phase }
+import nsc.plugins.{ Plugin, PluginComponent }
 import nsc.transform.Transform
-import nsc.transform.InfoTransform
-import nsc.transform.TypingTransformers
 import nsc.symtab.Flags._
 import nsc.ast.TreeDSL
-import nsc.typechecker
 
 class LocalImplicitsPlugin(val global: Global) extends Plugin {
   val name = "local-implicits"
