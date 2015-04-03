@@ -46,6 +46,6 @@ This plugin currently supports Scala 2.10 and 2.11.
 To use this plugin with SBT, add the following to build.sbt:
 
 ```scala
-addCompilerPlugin("com.github.mpilquist" %% "local-implicits" % "0.2.0")
+addCompilerPlugin("com.github.mpilquist" %% "local-implicits" % "0.3.0")
 ```
 
