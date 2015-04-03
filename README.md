@@ -12,7 +12,7 @@ expands to:
 
 ```scala
 {
-  implicit val local$1 = "Hello, world!"
+  implicit val implied$0 = "Hello, world!"
   implicitly[String]
 }
 ```
