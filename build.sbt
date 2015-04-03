@@ -47,7 +47,7 @@ pomExtra := (
       <url>http://github.com/mpilquist</url>
     </developer>
   </developers>
-),
+)
 pomPostProcess := { (node) =>
   import scala.xml._
   import scala.xml.transform._
@@ -57,7 +57,7 @@ pomPostProcess := { (node) =>
   }
   val stripTestScope = stripIf { n => n.label == "dependency" && (n \ "scope").text == "test" }
   new RuleTransformer(stripTestScope).transform(node)(0)
-},
+}
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
