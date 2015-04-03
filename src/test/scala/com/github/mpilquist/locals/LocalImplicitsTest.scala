@@ -6,12 +6,12 @@ class LocalImplicitsTest extends WordSpec with Matchers {
 
   "the local method" should {
     "evaluate the second parameter list with each value in the first parameter list declared implicitly" in {
-      val result = withImplicit(42) { implicitly[Int] }
+      val result = imply(42) { implicitly[Int] }
       result shouldBe 42
     }
 
     "support multiple implicits" in {
-      val result = withImplicits(42, "hi") { (implicitly[Int], implicitly[String]) }
+      val result = imply(42, "hi") { (implicitly[Int], implicitly[String]) }
       result shouldBe (42, "hi")
     }
 
@@ -26,13 +26,13 @@ class LocalImplicitsTest extends WordSpec with Matchers {
       }
 
       (2 |+| 5) shouldBe 7
-      withImplicit(Semigroup.intMultiplication) { (2 |+| 5) } shouldBe 10
+      imply(Semigroup.intMultiplication) { (2 |+| 5) } shouldBe 10
     }
 
     "not support overriding an implicit declared in the same scope as the expression" in {
       """
       implicit val x = 1
-      withImplicit(42) { implicitly[Int] }
+      imply(42) { implicitly[Int] }
       """ shouldNot compile
     }
   }

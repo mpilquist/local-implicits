@@ -19,13 +19,12 @@ class LocalImplicitsTransform(plugin: Plugin, val global: Global) extends Plugin
   val runsAfter = "parser" :: Nil
   val phaseName = "local-implicit-scoper"
 
-  val WithImplicitName = TermName("withImplicit")
-  val WithImplicitsName = TermName("withImplicits")
+  val ImplyName = TermName("imply")
 
   def newTransformer(unit: CompilationUnit) = new Transformer() {
     override def transform(tree: Tree): Tree = {
       tree match {
-        case Apply(Apply(Ident(WithImplicitName | WithImplicitsName), implicits), blocks) =>
+        case Apply(Apply(Ident(ImplyName), implicits), blocks) =>
           if (blocks.size == 1) super.transform(expandImplicits(implicits, blocks.head))
           else super.transform(tree)
 
@@ -36,7 +35,7 @@ class LocalImplicitsTransform(plugin: Plugin, val global: Global) extends Plugin
 
   private def expandImplicits(implicits: List[Tree], block: Tree): Tree = {
     val implicitVals = implicits.zipWithIndex map { case (imp, idx) =>
-      ValDef(Modifiers(IMPLICIT), TermName("local$" + idx), TypeTree(), imp)
+      ValDef(Modifiers(IMPLICIT), TermName("implied$" + idx), TypeTree(), imp)
     }
     Block(implicitVals, block)
   }
