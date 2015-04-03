@@ -1,0 +1,5 @@
+<plugin>
+  <name>local-implicits</name>
+  <classname>com.github.mpilquist.locals.LocalImplicitsPlugin</classname>
+</plugin>
+
