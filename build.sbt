@@ -12,7 +12,6 @@ crossBuild := true
 
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-  "com.chuusai" %% "shapeless" % "2.1.0",
   "org.scalatest" %% "scalatest" % "2.2.3" % "test"
 )
 
