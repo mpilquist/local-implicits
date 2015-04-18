@@ -33,10 +33,10 @@ Defining implicits in local scope with vanilla Scala is problematic for a number
 The `imply` method is particularly useful when working with type class instances that have multiple lawful implementations. For example, consider some monoid instances for `Int`:
 
 ```scala
-1 |+| 2                                     // 3
-imply(intMultiplication) { 1 |+| 2 } // 2
-imply(minMonoid) { 1 |+| 2 }         // 1
-imply(maxMonoid) { 1 |+| 2 }         // 2
+2 |+| 3                              // 5
+imply(intMultiplication) { 2 |+| 3 } // 6
+imply(minMonoid) { 2 |+| 3 }         // 2
+imply(maxMonoid) { 2 |+| 3 }         // 3
 ```
 
 ## Usage
