@@ -7,7 +7,7 @@ organization := "com.github.mpilquist"
 name := "local-implicits"
 
 scalaVersion := "2.11.5"
-crossScalaVersions := Seq("2.10.5", "2.11.5")
+crossScalaVersions := Seq("2.11.5")
 crossBuild := true
 
 libraryDependencies ++= Seq(

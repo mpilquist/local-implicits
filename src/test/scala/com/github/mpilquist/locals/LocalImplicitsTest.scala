@@ -29,11 +29,34 @@ class LocalImplicitsTest extends WordSpec with Matchers {
       imply(Semigroup.intMultiplication) { (2 |+| 5) } shouldBe 10
     }
 
-    "not support overriding an implicit declared in the same scope as the expression" in {
-      """
-      implicit val x = 1
-      imply(42) { implicitly[Int] }
-      """ shouldNot compile
+    "support overriding an implicit declared in the same scope as the expression" in {
+
+      {
+        implicit val x = 1
+        imply(42) { implicitly[Int] } shouldBe 42
+      }
+
+      object Foo {
+        implicit val x = 1
+        imply(42) { implicitly[Int] }
+      }
+    }
+
+    "support implying a more-specific type than is needed in the block, while the needed type is available in the same scope" in {
+      trait Semigroup[A] { def combine(x: A, y: A): A }
+      trait Monoid[A] extends Semigroup[A] { def id: A }
+
+      implicit val add = new Semigroup[Int] {
+        def combine(x: Int, y: Int) = x + y
+      }
+
+      val mult = new Monoid[Int] {
+        def combine(x: Int, y: Int) = x * y
+        def id = 1
+      }
+
+      imply(mult) { implicitly[Monoid[Int]].id } shouldBe 1
+      imply(mult) { implicitly[Semigroup[Int]].combine(1, 2) } shouldBe 2
     }
   }
 }

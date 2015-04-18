@@ -1,42 +1,50 @@
 package com.github.mpilquist.locals
 
-import scala.tools.nsc
-import nsc.{ Global, Phase }
-import nsc.plugins.{ Plugin, PluginComponent }
-import nsc.transform.Transform
-import nsc.symtab.Flags._
-import nsc.ast.TreeDSL
+import scala.language.experimental.macros
+import scala.reflect.macros.whitebox.Context
 
-class LocalImplicitsPlugin(val global: Global) extends Plugin {
-  val name = "local-implicits"
-  val description = "Introduces syntax for locally scoped implicits"
-  val components = new LocalImplicitsTransform(this, global) :: Nil
-}
+object LocalImplicits {
 
-class LocalImplicitsTransform(plugin: Plugin, val global: Global) extends PluginComponent with Transform with TreeDSL {
-  import global._
+  def implyEval(implicits: Any*)(f: String): Any = macro implyEvalMacro
 
-  val runsAfter = "parser" :: Nil
-  val phaseName = "local-implicit-scoper"
+  def implyEvalMacro(c: Context)(implicits: c.Expr[Any]*)(f: c.Expr[String]): c.Expr[Any] = {
+    import c.universe._
 
-  val ImplyName = TermName("imply")
-
-  def newTransformer(unit: CompilationUnit) = new Transformer() {
-    override def transform(tree: Tree): Tree = {
-      tree match {
-        case Apply(Apply(Ident(ImplyName), implicits), blocks) =>
-          if (blocks.size == 1) super.transform(expandImplicits(implicits, blocks.head))
-          else super.transform(tree)
-
-        case other => super.transform(other)
-      }
+    def trace(s: => String) = {
+      if (sys.props.get("locals.trace").isDefined) c.info(c.enclosingPosition, s, false)
     }
-  }
 
-  private def expandImplicits(implicits: List[Tree], block: Tree): Tree = {
-    val implicitVals = implicits.zipWithIndex map { case (imp, idx) =>
-      ValDef(Modifiers(IMPLICIT), TermName("implied$" + idx), TypeTree(), imp)
+    f.tree match {
+      case Literal(Constant(body: String)) =>
+        val imp = implicits.head
+        val implicitVals = implicits.zipWithIndex map { case (imp, idx) =>
+          val nme = TermName("implied$" + idx)
+          q"""implicit val $nme = $imp"""
+        }
+
+        val shadowingVals = implicits flatMap { imp =>
+          val existingImplicit = c.inferImplicitValue(imp.actualType.widen)
+          existingImplicit match {
+            case EmptyTree =>
+              None
+            case Ident(nme: TermName) =>
+              Some(q"""val $nme = $imp""")
+            case Select(This(_), nme: TermName) =>
+              Some(q"""val $nme = $imp""")
+            case other =>
+              trace("not shadowing: " + showRaw(other))
+              None
+          }
+        }
+
+        if (shadowingVals.nonEmpty) trace("Shadowed implicits: " + shadowingVals.mkString("\n", "\n", ""))
+
+        val parsedBlock = c.parse(body)
+        c.Expr[Any](c.typecheck(q"""
+          ..$shadowingVals
+          ..$implicitVals
+          $parsedBlock"""))
+      case other => c.abort(c.enclosingPosition, "Macro body should be a constant string!")
     }
-    Block(implicitVals, block)
   }
 }
